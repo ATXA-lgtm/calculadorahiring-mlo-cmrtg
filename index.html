@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Mortgage | MLO Commission Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; 
+            color: #f8fafc;
+        }
+        .gold-text { color: #d4af37; } 
+        .gold-bg { background-color: #d4af37; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #d4af37;
+            cursor: pointer;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 4px;
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Header & Language Selector -->
+    <header class="bg-slate-900 border-b border-slate-800 py-4 px-6 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 gold-bg rounded-full flex items-center justify-center text-slate-900 font-bold text-xl">
+                <i class="fa-solid fa-house-chimney"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-tight tracking-wide">COMPLETE MORTGAGE</h1>
+                <p class="text-xs text-slate-400">NMLS # 2085547</p>
+            </div>
+        </div>
+        <div>
+            <select id="langSelect" class="bg-slate-800 text-sm text-white border border-slate-700 rounded px-3 py-2 outline-none cursor-pointer focus:border-yellow-500 transition" onchange="changeLanguage()">
+                <option value="en">🇺🇸 English</option>
+                <option value="es">🇪🇸 Español</option>
+                <option value="pt">🇧🇷 Português</option>
+                <option value="fr">🇫🇷 Français</option>
+            </select>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-5xl flex flex-col lg:flex-row gap-8">
+        
+        <!-- Left Column: Inputs & Value Anchors -->
+        <div class="w-full lg:w-1/2 space-y-6">
+            <div class="text-center lg:text-left mb-6">
+                <h2 class="text-3xl font-bold mb-3" data-i18n="heroTitle">Stop giving away your hard work.</h2>
+                <p class="text-slate-400" data-i18n="heroSub">Calculate exactly how much money you are leaving on the table per deal with your current split.</p>
+            </div>
+
+            <!-- Interactive Inputs -->
+            <div class="glass-panel rounded-2xl p-6 shadow-xl border-t-4 border-t-yellow-500">
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="block text-sm font-semibold text-slate-300" data-i18n="grossLabel">Gross Commission per Deal</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 font-bold">$</span>
+                            <input type="number" id="grossCommissionInput" value="10000" class="w-32 bg-slate-800 border border-slate-600 text-white rounded-lg pl-7 pr-3 py-2 text-right font-bold text-lg outline-none focus:border-yellow-500 transition" oninput="syncFromInput()">
+                        </div>
+                    </div>
+                    <input type="range" id="grossCommission" min="2000" max="30000" step="100" value="10000" class="w-full mt-2" oninput="syncFromSlider()">
+                    <div class="flex justify-between text-xs text-slate-500 mt-2">
+                        <span>$2,000</span>
+                        <span>$30,000+</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-300 mb-2" data-i18n="splitLabel">Your Current Split</label>
+                    <select id="currentSplit" class="w-full bg-slate-800 border border-slate-600 text-white rounded-lg px-4 py-3 outline-none focus:border-yellow-500 transition cursor-pointer" onchange="calculate()">
+                        <option value="0.9">90/10</option>
+                        <option value="0.8" selected>80/20</option>
+                        <option value="0.7">70/30</option>
+                        <option value="0.6">60/40</option>
+                        <option value="0.5">50/50</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Institutional Value Anchor -->
+            <div class="glass-panel rounded-2xl p-6 shadow-md">
+                <h3 class="text-lg font-bold mb-2 text-white" data-i18n="anchorTitle">Benefits of partnering with Complete Mortgage</h3>
+                <p class="text-sm text-yellow-500 font-semibold mb-4" data-i18n="anchorSub">As an independent MLO, this could cost you $2,950/month. With us, it's included.</p>
+                <ul class="space-y-4 text-sm text-slate-300">
+                    <li class="flex items-start gap-3">
+                        <div class="mt-1 text-slate-400"><i class="fa-solid fa-building"></i></div>
+                        <div><strong class="text-white" data-i18n="perk1Title">Executive Offices:</strong> <span data-i18n="perk1Desc">Free access to FL locations for client meetings.</span></div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="mt-1 text-slate-400"><i class="fa-solid fa-laptop-code"></i></div>
+                        <div><strong class="text-white" data-i18n="perk2Title">Digital Brand:</strong> <span data-i18n="perk2Desc">Custom landing page & corporate email.</span></div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="mt-1 text-slate-400"><i class="fa-solid fa-users-gear"></i></div>
+                        <div><strong class="text-white" data-i18n="perk3Title">In-House Processing:</strong> <span data-i18n="perk3Desc">You sell, our dedicated team chases the paperwork.</span></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Column: Financial Results -->
+        <div class="w-full lg:w-1/2 flex flex-col justify-start pt-2">
+            
+            <div class="bg-slate-800 rounded-2xl overflow-hidden shadow-2xl border border-slate-700">
+                <!-- Current Broker Result -->
+                <div class="p-6 border-b border-slate-700 bg-slate-800/80">
+                    <p class="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-1" data-i18n="currentTakeLabel">Your Current Take-Home</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-4xl font-bold text-white" id="currentTake">$8,000</span>
+                        <span class="text-sm text-slate-500" data-i18n="perDeal">/ deal</span>
+                    </div>
+                </div>
+
+                <!-- Complete Mortgage Result -->
+                <div class="p-8 bg-gradient-to-br from-slate-900 to-slate-800 relative shadow-inner">
+                    <div class="absolute top-0 right-0 bg-yellow-500 text-slate-900 text-xs font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
+                        $899 Flat Fee
+                    </div>
+                    <p class="text-xs gold-text uppercase tracking-widest font-semibold mb-1" data-i18n="cmTakeLabel">Complete Mortgage Take-Home</p>
+                    <div class="flex items-baseline gap-2 mb-2">
+                        <span class="text-5xl font-bold text-white" id="cmTake">$9,101</span>
+                        <span class="text-sm text-slate-400" data-i18n="perDeal">/ deal</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2"><i class="fa-solid fa-calculator mr-1"></i> <span data-i18n="mathDetail">Gross Commission minus $899 flat fee.</span></p>
+                </div>
+
+                <!-- The Difference (Pain Point) -->
+                <div class="bg-red-500/10 border-t border-red-500/20 p-6 text-center">
+                    <p class="text-red-400 font-semibold mb-2" data-i18n="lossLabel">Money left on the table per deal:</p>
+                    <p class="text-4xl font-bold text-red-500" id="moneyLost">$1,101</p>
+                </div>
+
+                <!-- Call to Action -->
+                <div class="p-6 bg-slate-900">
+                    <button onclick="openModal()" class="w-full gold-bg text-slate-900 font-bold text-lg py-4 rounded-xl shadow-lg hover:bg-yellow-400 transition transform hover:-translate-y-1" data-i18n="ctaBtn">
+                        Keep Your Commission. Apply Now.
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Disclaimers & Compliance -->
+    <footer class="bg-slate-950 mt-12 py-8 border-t border-slate-800 text-slate-500 text-xs text-justify">
+        <div class="container mx-auto px-6 max-w-5xl space-y-4">
+            
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 border-b border-slate-800 pb-4">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-house-chimney text-xl"></i>
+                    <span class="font-bold">EQUAL HOUSING LENDER | EOE</span>
+                </div>
+                <div>
+                    <strong>Complete Mortgage LLC | NMLS # 2085547</strong>
+                </div>
+            </div>
+
+            <p><strong data-i18n="legalTitle1">Professional Recruitment & Illustrative Disclosures:</strong> <span data-i18n="legalText1">This interactive calculator is strictly an educational and recruitment simulation tool intended solely for licensed Mortgage Loan Originators (MLOs) and prospective industry professionals. It does not constitute an offer of credit, a loan pre-qualification, a mortgage commitment, or consumer financial advice under Regulation Z (TILA) or RESPA.</span></p>
+            
+            <p><span data-i18n="legalText2">All earnings projections, commissions, and overhead savings (including office spaces, technology, and mentorship) are hypothetical estimates based on user-inputted variables and industry benchmarks. They do not constitute a guarantee of volume, production, or actual income. Individual earnings vary based on market conditions, personal sales performance, and approved loan volume. Actual compensation and operational charges are strictly governed by the formal Independent Contractor Agreement (W-9) or Employment Contract executed with Complete Mortgage LLC.</span></p>
+
+            <p><strong data-i18n="legalTitle2">Technology Provider Disclaimer:</strong> <span data-i18n="legalText3">Software, user interface, and calculation engines powered by ATXA INNOVATION. ATXA INNOVATION is a third-party software and marketing technology provider. ATXA INNOVATION is not a mortgage lender, broker, financial institution, or licensed origination entity, and assumes no liability for recruitment representations, compensation disputes, regulatory compliance of origination activities, or financial agreements made between Complete Mortgage LLC and participating Loan Officers.</span></p>
+            
+            <div class="text-center pt-6">
+                <a href="https://www.atxa-ie.com" target="_blank" class="text-slate-600 hover:text-slate-400 transition font-bold tracking-widest text-[11px] uppercase">
+                    POWERED BY WWW.ATXA-IE.COM
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lead Generation Modal (TCPA Compliant) -->
+    <div id="leadModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="modalContent">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
+                <h3 class="text-xl font-bold text-white" data-i18n="modalTitle">Schedule Executive Intro</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="leadForm" class="space-y-4" onsubmit="event.preventDefault(); submitForm();">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1" data-i18n="formName">Full Name</label>
+                        <input type="text" id="leadName" required class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white outline-none focus:border-yellow-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1" data-i18n="formEmail">Corporate or Personal Email</label>
+                        <input type="email" id="leadEmail" required class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white outline-none focus:border-yellow-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1" data-i18n="formPhone">Phone Number</label>
+                        <input type="tel" id="leadPhone" required class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white outline-none focus:border-yellow-500">
+                    </div>
+                    
+                    <!-- TCPA Consent -->
+                    <div class="flex items-start gap-3 mt-4 bg-slate-950 p-4 rounded border border-slate-800">
+                        <input type="checkbox" id="tcpa" required class="mt-1 accent-yellow-500 cursor-pointer w-4 h-4">
+                        <label for="tcpa" class="text-[10px] text-slate-400 leading-tight" data-i18n="tcpaText">
+                            By submitting this form, you authorize Complete Mortgage LLC to contact you via phone call, SMS, and email regarding career opportunities and platform onboarding. Consent is not a condition of affiliation. Message & data rates may apply.
+                        </label>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="w-full gold-bg text-slate-900 font-bold py-3 rounded-lg hover:bg-yellow-400 transition mt-4 flex justify-center items-center gap-2">
+                        <span data-i18n="formSubmit">Submit & Schedule</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT PUBLICADA:
+        // =========================================================================
+        const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxi58_uLws5AZGLdnb4UoBSwSx3yq-hXQC57dzEASK0OrDDYwRtPr6FoYg6mzOZqFgMXg/exec';
+
+        // Diccionario de Traducciones (4 Idiomas)
+        const translations = {
+            "en": {
+                "heroTitle": "Stop giving away your hard work.",
+                "heroSub": "Calculate exactly how much money you are leaving on the table per deal with your current split.",
+                "grossLabel": "Gross Commission per Deal",
+                "splitLabel": "Your Current Split",
+                "anchorTitle": "Benefits of partnering with Complete Mortgage",
+                "anchorSub": "As an independent MLO, this could cost you $2,950/month. With us, it's included.",
+                "perk1Title": "Executive Offices:",
+                "perk1Desc": "Free access to FL locations for client meetings.",
+                "perk2Title": "Digital Brand:",
+                "perk2Desc": "Custom landing page & corporate email.",
+                "perk3Title": "In-House Processing:",
+                "perk3Desc": "You sell, our dedicated team chases the paperwork.",
+                "currentTakeLabel": "Your Current Take-Home",
+                "perDeal": "/ deal",
+                "cmTakeLabel": "Complete Mortgage Take-Home",
+                "mathDetail": "Gross Commission minus $899 flat fee.",
+                "lossLabel": "Money left on the table per deal:",
+                "ctaBtn": "Keep Your Commission. Apply Now.",
+                "modalTitle": "Schedule Executive Intro",
+                "formName": "Full Name",
+                "formEmail": "Corporate or Personal Email",
+                "formPhone": "Phone Number",
+                "tcpaText": "By submitting this form, you authorize Complete Mortgage LLC to contact you via phone call, SMS, and email regarding career opportunities and platform onboarding. Consent is not a condition of affiliation. Message & data rates may apply.",
+                "formSubmit": "Submit & Schedule",
+                "processingTxt": "Processing...",
+                "legalTitle1": "Professional Recruitment & Illustrative Disclosures:",
+                "legalText1": "This interactive calculator is strictly an educational and recruitment simulation tool intended solely for licensed Mortgage Loan Originators (MLOs) and prospective industry professionals. It does not constitute an offer of credit, a loan pre-qualification, a mortgage commitment, or consumer financial advice under Regulation Z (TILA) or RESPA.",
+                "legalText2": "All earnings projections, commissions, and overhead savings (including office spaces, technology, and mentorship) are hypothetical estimates based on user-inputted variables and industry benchmarks. They do not constitute a guarantee of volume, production, or actual income. Individual earnings vary based on market conditions, personal sales performance, and approved loan volume. Actual compensation and operational charges are strictly governed by the formal Independent Contractor Agreement (W-9) or Employment Contract executed with Complete Mortgage LLC.",
+                "legalTitle2": "Technology Provider Disclaimer:",
+                "legalText3": "Software, user interface, and calculation engines powered by ATXA INNOVATION. ATXA INNOVATION is a third-party software and marketing technology provider. ATXA INNOVATION is not a mortgage lender, broker, financial institution, or licensed origination entity, and assumes no liability for recruitment representations, compensation disputes, regulatory compliance of origination activities, or financial agreements made between Complete Mortgage LLC and participating Loan Officers."
+            },
+            "es": {
+                "heroTitle": "Deja de regalar tu esfuerzo.",
+                "heroSub": "Calcula exactamente cuánto dinero dejas en la mesa por cada transacción con tu split actual.",
+                "grossLabel": "Comisión Bruta por Cierre",
+                "splitLabel": "Tu Split Actual",
+                "anchorTitle": "Beneficios de asociarse con Complete Mortgage",
+                "anchorSub": "Como MLO independiente, esto podría costarte $2,950/mes. Con nosotros, está incluido.",
+                "perk1Title": "Oficinas Ejecutivas:",
+                "perk1Desc": "Acceso libre a sedes en FL para tus clientes.",
+                "perk2Title": "Marca Digital:",
+                "perk2Desc": "Landing page y correo corporativo.",
+                "perk3Title": "Procesamiento In-House:",
+                "perk3Desc": "Tú vendes, nosotros perseguimos el papeleo.",
+                "currentTakeLabel": "Tu Ganancia Actual",
+                "perDeal": "/ caso",
+                "cmTakeLabel": "Ganancia en Complete Mortgage",
+                "mathDetail": "Comisión Bruta menos fee fijo de $899.",
+                "lossLabel": "Dinero que pierdes por caso:",
+                "ctaBtn": "Quédate tu Comisión. Postúlate.",
+                "modalTitle": "Agendar Reunión Ejecutiva",
+                "formName": "Nombre Completo",
+                "formEmail": "Correo Corporativo o Personal",
+                "formPhone": "Número de Teléfono",
+                "tcpaText": "Al enviar este formulario, autoriza a Complete Mortgage LLC a contactarle mediante llamada, SMS y correo electrónico sobre oportunidades de carrera. El consentimiento no es condición de afiliación. Pueden aplicar tarifas de datos.",
+                "formSubmit": "Enviar y Agendar",
+                "processingTxt": "Procesando...",
+                "legalTitle1": "Reclutamiento Profesional y Divulgaciones:",
+                "legalText1": "Esta calculadora es una herramienta de simulación estrictamente educativa para MLOs con licencia. No constituye una oferta de crédito ni asesoramiento financiero bajo la Regulación Z (TILA) o RESPA.",
+                "legalText2": "Todas las proyecciones de ingresos y ahorros operativos son estimaciones hipotéticas y no constituyen una garantía de volumen o ingresos reales. La compensación real se rige estrictamente por el Acuerdo formal de Contratista Independiente (W-9) ejecutado con Complete Mortgage LLC.",
+                "legalTitle2": "Descargo del Proveedor Tecnológico:",
+                "legalText3": "Software e interfaz impulsados por ATXA INNOVATION. ATXA INNOVATION es un proveedor externo y no asume responsabilidad por representaciones de reclutamiento, disputas de compensación o cumplimiento regulatorio entre Complete Mortgage LLC y los oficiales de préstamo."
+            },
+            "pt": {
+                "heroTitle": "Pare de entregar seu esforço.",
+                "heroSub": "Calcule exatamente quanto dinheiro você está deixando na mesa por negócio com seu split atual.",
+                "grossLabel": "Comissão Bruta por Negócio",
+                "splitLabel": "Seu Split Atual",
+                "anchorTitle": "Benefícios de ser parceiro da Complete Mortgage",
+                "anchorSub": "Como MLO independente, isso poderia lhe custar $2.950/mês. Conosco, está incluído.",
+                "perk1Title": "Escritórios Executivos:",
+                "perk1Desc": "Acesso gratuito em locais na FL.",
+                "perk2Title": "Marca Digital:",
+                "perk2Desc": "Landing page e e-mail corporativo.",
+                "perk3Title": "Processamento In-House:",
+                "perk3Desc": "Você vende, nós cuidamos da papelada.",
+                "currentTakeLabel": "Seu Ganho Atual",
+                "perDeal": "/ negócio",
+                "cmTakeLabel": "Ganho na Complete Mortgage",
+                "mathDetail": "Comissão Bruta menos taxa fixa de $899.",
+                "lossLabel": "Dinheiro perdido por negócio:",
+                "ctaBtn": "Mantenha sua Comissão. Inscreva-se.",
+                "modalTitle": "Agendar Reunião Executiva",
+                "formName": "Nome Completo",
+                "formEmail": "E-mail Corporativo ou Pessoal",
+                "formPhone": "Número de Telefone",
+                "tcpaText": "Ao enviar este formulário, você autoriza a Complete Mortgage LLC a contatá-lo via chamada, SMS e e-mail. O consentimento não é condição para afiliação. Tarifas de mensagens e dados podem ser aplicadas.",
+                "formSubmit": "Enviar e Agendar",
+                "processingTxt": "Processando...",
+                "legalTitle1": "Recrutamento Profissional e Divulgações:",
+                "legalText1": "Esta calculadora é estritamente uma ferramenta de simulação educacional para MLOs licenciados. Não constitui oferta de crédito sob a Regulação Z (TILA).",
+                "legalText2": "Todas as projeções de ganhos são estimativas hipotéticas e não garantem renda real. A compensação real é regida pelo Acordo de Contratante Independente formal.",
+                "legalTitle2": "Isenção do Provedor de Tecnologia:",
+                "legalText3": "Software fornecido pela ATXA INNOVATION. A ATXA INNOVATION não é credora ou corretora e não assume qualquer responsabilidade sobre acordos ou conformidade regulatória entre a Complete Mortgage LLC e os MLOs."
+            },
+            "fr": {
+                "heroTitle": "Arrêtez de céder votre travail acharné.",
+                "heroSub": "Calculez exactement combien d'argent vous laissez sur la table par transaction avec votre répartition actuelle.",
+                "grossLabel": "Commission Brute par Transaction",
+                "splitLabel": "Votre Répartition Actuelle",
+                "anchorTitle": "Avantages de travailler avec Complete Mortgage",
+                "anchorSub": "En tant que MLO indépendant, cela pourrait vous coûter 2 950 $/mois. Avec nous, c'est inclus.",
+                "perk1Title": "Bureaux Exécutifs :",
+                "perk1Desc": "Accès gratuit aux sites de FL.",
+                "perk2Title": "Marque Numérique :",
+                "perk2Desc": "Page de destination et e-mail dédiés.",
+                "perk3Title": "Traitement Interne :",
+                "perk3Desc": "Vous vendez, nous gérons la paperasse.",
+                "currentTakeLabel": "Votre Gain Actuel",
+                "perDeal": "/ dossier",
+                "cmTakeLabel": "Gain avec Complete Mortgage",
+                "mathDetail": "Commission Brute moins frais fixes de 899 $.",
+                "lossLabel": "Argent perdu par dossier :",
+                "ctaBtn": "Gardez votre Commission. Postulez.",
+                "modalTitle": "Planifier une Réunion",
+                "formName": "Nom Complet",
+                "formEmail": "E-mail Professionnel",
+                "formPhone": "Numéro de Téléphone",
+                "tcpaText": "En soumettant ce formulaire, vous autorisez Complete Mortgage LLC à vous contacter par appel, SMS et e-mail. Le consentement n'est pas une condition d'affiliation.",
+                "formSubmit": "Soumettre et Planifier",
+                "processingTxt": "Traitement...",
+                "legalTitle1": "Recrutement Professionnel et Divulgations :",
+                "legalText1": "Cette calculatrice est un outil de simulation à des fins éducatives pour les MLOs licenciés. Il ne s'agit pas d'une offre de crédit sous la Régulation Z (TILA).",
+                "legalText2": "Les projections de revenus sont des estimations hypothétiques et ne garantissent pas le revenu réel. La rémunération est régie par le contrat d'entrepreneur indépendant (W-9).",
+                "legalTitle2": "Avis du Fournisseur de Technologie :",
+                "legalText3": "Logiciel fourni par ATXA INNOVATION. ATXA INNOVATION n'assume aucune responsabilité quant aux accords de rémunération ou à la conformité réglementaire de Complete Mortgage LLC."
+            }
+        };
+
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+        };
+
+        const inputEl = document.getElementById('grossCommissionInput');
+        const sliderEl = document.getElementById('grossCommission');
+
+        function syncFromSlider() {
+            inputEl.value = sliderEl.value;
+            calculate();
+        }
+
+        function syncFromInput() {
+            let val = parseInt(inputEl.value);
+            if (isNaN(val)) val = 0;
+            sliderEl.value = val;
+            calculate();
+        }
+
+        function calculate() {
+            let grossVal = parseFloat(inputEl.value);
+            if (isNaN(grossVal)) grossVal = 0;
+            
+            const splitVal = parseFloat(document.getElementById('currentSplit').value);
+            const flatFee = 899;
+
+            const currentTake = grossVal * splitVal;
+            const cmTake = grossVal - flatFee;
+            const moneyLost = cmTake - currentTake;
+
+            document.getElementById('currentTake').innerText = formatCurrency(currentTake);
+            
+            const cmTakeEl = document.getElementById('cmTake');
+            if (cmTake > 0) {
+                cmTakeEl.innerText = formatCurrency(cmTake);
+                cmTakeEl.classList.remove('text-red-500');
+                cmTakeEl.classList.add('text-white');
+            } else {
+                cmTakeEl.innerText = "$0";
+                cmTakeEl.classList.remove('text-white');
+                cmTakeEl.classList.add('text-red-500');
+            }
+            
+            const moneyLostEl = document.getElementById('moneyLost');
+            if(moneyLost > 0) {
+                moneyLostEl.innerText = formatCurrency(moneyLost);
+                moneyLostEl.classList.remove('text-slate-500');
+                moneyLostEl.classList.add('text-red-500');
+            } else {
+                moneyLostEl.innerText = formatCurrency(0);
+                moneyLostEl.classList.remove('text-red-500');
+                moneyLostEl.classList.add('text-slate-500');
+            }
+        }
+
+        function changeLanguage() {
+            const lang = document.getElementById('langSelect').value;
+            const trans = translations[lang];
+            const elements = document.querySelectorAll('[data-i18n]');
+            
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (trans[key]) {
+                    if(el.tagName === 'SPAN' && el.parentElement.tagName === 'BUTTON') {
+                        el.innerText = trans[key];
+                    } else {
+                        el.innerText = trans[key];
+                    }
+                }
+            });
+        }
+
+        const modal = document.getElementById('leadModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        function openModal() {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        async function submitForm() {
+            const btn = document.getElementById('submitBtn');
+            const lang = document.getElementById('langSelect').value;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${translations[lang]['processingTxt']}`;
+            btn.disabled = true;
+
+            const formData = new URLSearchParams();
+            formData.append('name', document.getElementById('leadName').value);
+            formData.append('email', document.getElementById('leadEmail').value);
+            formData.append('phone', document.getElementById('leadPhone').value);
+            formData.append('language', lang);
+            formData.append('grossCommission', document.getElementById('grossCommissionInput').value);
+            formData.append('split', document.getElementById('currentSplit').value);
+
+            try {
+                if(GOOGLE_APP_SCRIPT_URL !== 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI') {
+                    await fetch(GOOGLE_APP_SCRIPT_URL, {
+                        method: 'POST',
+                        body: formData,
+                        mode: 'no-cors'
+                    });
+                } else {
+                    console.warn("URL de Google Apps Script pendiente de configuración.");
+                }
+
+                let redirectUrl = "";
+                if (lang === 'es') {
+                    redirectUrl = "https://outlook.office.com/book/DanielaLainville1@completemrtg.com/?ismsaljsauthenabled";
+                } else {
+                    redirectUrl = "https://bookings.cloud.microsoft/bookwithme/user/e56b0136e436454fa152812c0a187739%40completemrtg.com?anonymous&ismsaljsauthenabled";
+                }
+
+                window.location.href = redirectUrl;
+
+            } catch (error) {
+                console.error("Error al procesar el envío:", error);
+                let redirectUrl = (lang === 'es') 
+                    ? "https://outlook.office.com/book/DanielaLainville1@completemrtg.com/?ismsaljsauthenabled" 
+                    : "https://bookings.cloud.microsoft/bookwithme/user/e56b0136e436454fa152812c0a187739%40completemrtg.com?anonymous&ismsaljsauthenabled";
+                window.location.href = redirectUrl;
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        window.onload = () => {
+            calculate();
+        };
+    </script>
+</body>
+</html>
